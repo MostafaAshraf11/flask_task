@@ -189,7 +189,7 @@ def generate_segmentation_mask(db_id, lower_bound, upper_bound):
     cv2.imwrite(mask_path, mask)
     cv2.imwrite(segmented_image_path, segmented_image)
 
-    return mask_path, segmented_image_path
+    return  mask_path, segmented_image_path
 
 
 def transform_image(image_id, width, height, format_type=None):

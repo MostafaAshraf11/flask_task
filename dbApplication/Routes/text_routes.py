@@ -11,6 +11,21 @@ text_routes = Blueprint('text_routes', __name__)
 
 nlp = spacy.load("en_core_web_sm")
 
+@text_routes.route('/summarize', methods=['POST'])
+def summarize():
+    data = request.json
+    text = data.get('text')
+    if not text:
+        return jsonify({'error': 'No text provided'}), 400
+
+    # Process the text with spaCy
+    doc = nlp(text)
+
+    # Extract sentences with named entities or keywords (basic extractive summarization)
+    summary = [sent.text for sent in doc.sents if len(sent.ents) > 0]
+    summary_text = ' '.join(summary[:3])  # Return top 3 sentences
+
+    return jsonify({'summary': summary_text})
 
 @text_routes.route('/keywords', methods=['POST'])
 def extract_keywords():
