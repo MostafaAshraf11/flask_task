@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, Response, request, jsonify
 from Controller.imageUploadController import (crop_image, transform_image, upload_image_to_cloudinary,fetch_image_from_db,
                                               fetch_images_with_pagination, generate_color_histogram,
                                               generate_segmentation_mask)
@@ -67,14 +67,13 @@ def generate_segmentation(db_id):
         return jsonify({'error': 'Color bounds are required'}), 400
 
     # Generate segmentation mask and segmented image as responses
-    mask_response, segmented_response = generate_segmentation_mask(db_id, lower_bound, upper_bound)
+    segmented_image_bytes = generate_segmentation_mask(db_id, lower_bound, upper_bound)
 
-    if isinstance(mask_response, dict) and 'error' in mask_response:
-        return jsonify(mask_response), 404
-
-    # Return both responses as a multipart response or handle separately
-    # This example assumes you want to send both as separate responses.
-    return mask_response, segmented_response
+    if isinstance(segmented_image_bytes, dict) and 'error' in segmented_image_bytes:
+        return jsonify(segmented_image_bytes), 404
+    
+    # Return the segmented image as a PNG response
+    return Response(segmented_image_bytes, mimetype='image/png')
 
 # Route to resize image
 @image_routes.route('/resize_image/<int:image_id>', methods=['POST'])

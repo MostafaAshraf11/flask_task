@@ -156,43 +156,36 @@ def generate_color_histogram(db_id):
 
 def generate_segmentation_mask(db_id, lower_bound, upper_bound):
     """
-    Generate a segmentation mask and return the images in-memory.
+    Generate a segmentation mask and save the results as images.
     """
-    try:
-        # Fetch the image data (URL and filename) from the database using db_id
-        image_data, status_code = fetch_image_from_db(db_id)
-        if status_code != 200:
-            return image_data  # Return error message if the image is not found
-        
-        image_url = image_data['url']  # Get the URL from the database record
+    # Fetch the image data (URL and filename) from the database using db_id
+    image_data, status_code = fetch_image_from_db(db_id)
+    if status_code != 200:
+        return image_data  # Return error message if the image is not found
+    
+    image_url = image_data['url']  # Get the URL from the database record
 
-        # Fetch the image from the URL
-        image = fetch_image_from_url(image_url)
-        if image is None:
-            return {'error': 'Image could not be retrieved from the URL'}, 404
-        
-        # Convert to HSV (Hue, Saturation, Value) color space for easier thresholding
-        hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-        
-        # Apply the mask to the image
-        mask = cv2.inRange(hsv_image, np.array(lower_bound), np.array(upper_bound))
-        
-        # Apply the mask to get the segmented regions
-        segmented_image = cv2.bitwise_and(image, image, mask=mask)
+    # Fetch the image from the URL
+    image = fetch_image_from_url(image_url)
+    if image is None:
+        return {'error': 'Image could not be retrieved from the URL'}, 404
+    
+    # Convert to HSV (Hue, Saturation, Value) color space for easier thresholding
+    hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    
+    # Apply the mask to the image
+    mask = cv2.inRange(hsv_image, np.array(lower_bound), np.array(upper_bound))
+    
+    # Apply the mask to get the segmented regions
+    segmented_image = cv2.bitwise_and(image, image, mask=mask)
 
-        # Prepare mask image as bytes
-        _, mask_buffer = cv2.imencode('.png', mask)
-        mask_image_bytes = mask_buffer.tobytes()
-
-        # Prepare segmented image as bytes
-        _, segmented_buffer = cv2.imencode('.png', segmented_image)
-        segmented_image_bytes = segmented_buffer.tobytes()
-
-        # Return the image bytes as a response
-        return mask_image_bytes, segmented_image_bytes
-
-    except Exception as e:
-        return {'error': str(e)}, 500
+    # Encode the segmented image to PNG format and save to a buffer
+    _, segmented_image_buffer = cv2.imencode('.png', segmented_image)
+    
+    # Create a byte buffer for the segmented image
+    segmented_image_bytes = io.BytesIO(segmented_image_buffer.tobytes())
+    
+    return segmented_image_bytes
 
 
 def transform_image(image_id, width, height, format_type=None):
