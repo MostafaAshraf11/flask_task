@@ -1,4 +1,4 @@
-from flask import request, jsonify
+from flask import Response, request, jsonify
 import pandas as pd
 import os
 from Models.loan_models import LoanApproval
@@ -308,10 +308,10 @@ def compute_advanced_stats(column_name):
     except Exception as e:
         return {"error": str(e)}, 500
 
-
-def generate_chart(column_name):
+# Function to generate Bar Chart (Histogram)
+def generate_bar_chart(column_name):
     try:
-        # Dynamically fetch the column object
+        # Dynamically fetch the column object from the LoanApproval table
         column = getattr(LoanApproval, column_name, None)
         if column is None:
             return {"error": f"Column '{column_name}' does not exist in the LoanApproval table"}, 400
@@ -323,11 +323,6 @@ def generate_chart(column_name):
         if not data:
             return {"error": f"No data available for column '{column_name}'"}, 400
 
-        # Ensure the static directory exists
-        static_dir = os.path.join(os.getcwd(), "static")
-        if not os.path.exists(static_dir):
-            os.makedirs(static_dir)
-
         # Generate a simple bar chart using matplotlib
         plt.figure(figsize=(10, 6))
         plt.hist(data, bins=10, color='blue', edgecolor='black', alpha=0.7)
@@ -335,11 +330,33 @@ def generate_chart(column_name):
         plt.xlabel(column_name.capitalize())
         plt.ylabel("Frequency")
 
-        # Save the bar chart to a file
-        bar_chart_filename = f"{column_name}_bar_chart.png"
-        bar_chart_path = os.path.join(static_dir, bar_chart_filename)
-        plt.savefig(bar_chart_path)
+        # Save the bar chart to a bytes buffer
+        buffer = io.BytesIO()
+        plt.savefig(buffer, format='png')
+        buffer.seek(0)
         plt.close()
+
+        # Return the image as a response directly to Postman
+        return Response(buffer, mimetype='image/png')
+
+    except Exception as e:
+        return {"error": str(e)}, 500
+
+
+# Function to generate Line Graph
+def generate_line_graph(column_name):
+    try:
+        # Dynamically fetch the column object from the LoanApproval table
+        column = getattr(LoanApproval, column_name, None)
+        if column is None:
+            return {"error": f"Column '{column_name}' does not exist in the LoanApproval table"}, 400
+
+        # Fetch data for the specified column
+        data = [row[0] for row in LoanApproval.query.with_entities(column).all()]
+
+        # Check if data is empty
+        if not data:
+            return {"error": f"No data available for column '{column_name}'"}, 400
 
         # Generate a line graph using matplotlib
         plt.figure(figsize=(10, 6))
@@ -348,24 +365,14 @@ def generate_chart(column_name):
         plt.xlabel("Index")
         plt.ylabel(column_name.capitalize())
 
-        # Save the line graph to a file
-        line_graph_filename = f"{column_name}_line_graph.png"
-        line_graph_path = os.path.join(static_dir, line_graph_filename)
-        plt.savefig(line_graph_path)
+        # Save the line graph to a bytes buffer
+        buffer = io.BytesIO()
+        plt.savefig(buffer, format='png')
+        buffer.seek(0)
         plt.close()
 
-        return {
-            "message": "Charts generated successfully",
-            "bar_chart_url": f"/static/{bar_chart_filename}",
-            "line_graph_url": f"/static/{line_graph_filename}"
-        }, 200
+        # Return the image as a response directly to Postman
+        return Response(buffer, mimetype='image/png')
 
     except Exception as e:
         return {"error": str(e)}, 500
-    
-def image_to_base64(image):
-    # Convert image to a BytesIO object
-    buffered = BytesIO()
-    image.save(buffered, format="PNG")
-    # Convert to base64
-    return base64.b64encode(buffered.getvalue()).decode('utf-8')

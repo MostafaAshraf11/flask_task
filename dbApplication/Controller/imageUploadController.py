@@ -156,40 +156,43 @@ def generate_color_histogram(db_id):
 
 def generate_segmentation_mask(db_id, lower_bound, upper_bound):
     """
-    Generate a segmentation mask and save the results as images.
+    Generate a segmentation mask and return the images in-memory.
     """
-    # Fetch the image data (URL and filename) from the database using db_id
-    image_data, status_code = fetch_image_from_db(db_id)
-    if status_code != 200:
-        return image_data  # Return error message if the image is not found
-    
-    image_url = image_data['url']  # Get the URL from the database record
+    try:
+        # Fetch the image data (URL and filename) from the database using db_id
+        image_data, status_code = fetch_image_from_db(db_id)
+        if status_code != 200:
+            return image_data  # Return error message if the image is not found
+        
+        image_url = image_data['url']  # Get the URL from the database record
 
-    # Fetch the image from the URL
-    image = fetch_image_from_url(image_url)
-    if image is None:
-        return {'error': 'Image could not be retrieved from the URL'}, 404
-    
-    # Convert to HSV (Hue, Saturation, Value) color space for easier thresholding
-    hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-    
-    # Apply the mask to the image
-    mask = cv2.inRange(hsv_image, np.array(lower_bound), np.array(upper_bound))
-    
-    # Apply the mask to get the segmented regions
-    segmented_image = cv2.bitwise_and(image, image, mask=mask)
-    
-    # Save the mask and segmented image as files
-    mask_path = f'static/masks/mask_{db_id}.png'
-    segmented_image_path = f'static/segmented/segmented_{db_id}.png'
-    
-    os.makedirs(os.path.dirname(mask_path), exist_ok=True)
-    os.makedirs(os.path.dirname(segmented_image_path), exist_ok=True)
-    
-    cv2.imwrite(mask_path, mask)
-    cv2.imwrite(segmented_image_path, segmented_image)
+        # Fetch the image from the URL
+        image = fetch_image_from_url(image_url)
+        if image is None:
+            return {'error': 'Image could not be retrieved from the URL'}, 404
+        
+        # Convert to HSV (Hue, Saturation, Value) color space for easier thresholding
+        hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+        
+        # Apply the mask to the image
+        mask = cv2.inRange(hsv_image, np.array(lower_bound), np.array(upper_bound))
+        
+        # Apply the mask to get the segmented regions
+        segmented_image = cv2.bitwise_and(image, image, mask=mask)
 
-    return  mask_path, segmented_image_path
+        # Prepare mask image as bytes
+        _, mask_buffer = cv2.imencode('.png', mask)
+        mask_image_bytes = mask_buffer.tobytes()
+
+        # Prepare segmented image as bytes
+        _, segmented_buffer = cv2.imencode('.png', segmented_image)
+        segmented_image_bytes = segmented_buffer.tobytes()
+
+        # Return the image bytes as a response
+        return mask_image_bytes, segmented_image_bytes
+
+    except Exception as e:
+        return {'error': str(e)}, 500
 
 
 def transform_image(image_id, width, height, format_type=None):

@@ -1,5 +1,7 @@
 from flask import request, jsonify
 from Controller.loan_approvalController import (
+    generate_bar_chart,
+    generate_line_graph,
     upload_csv,
     create_loan,
     get_all_loans,
@@ -7,7 +9,6 @@ from Controller.loan_approvalController import (
     update_loan,
     delete_loan,
     filter_and_aggregate,
-    generate_chart,
     compute_advanced_stats
 )
 
@@ -66,6 +67,7 @@ def register_routes(app, db):
         response, status_code = compute_advanced_stats(column_name)
         return jsonify(response), status_code
     
+# POST route for Bar Chart (Histogram)
     @app.route('/loan_approval/chart', methods=['POST'])
     def chart_route():
         data = request.get_json()
@@ -73,8 +75,23 @@ def register_routes(app, db):
             return jsonify({"error": "Please provide a 'column_name' in the request body"}), 400
 
         column_name = data["column_name"]
-        response, status_code = generate_chart(column_name)
-        return jsonify(response), status_code
+        
+        # Call generate_bar_chart to get the bar chart image and return the response directly
+        return generate_bar_chart(column_name)
+
+
+    # POST route for Line Graph
+    @app.route('/loan_approval/graph', methods=['POST'])
+    def graph_route():
+        data = request.get_json()
+        if not data or "column_name" not in data:
+            return jsonify({"error": "Please provide a 'column_name' in the request body"}), 400
+
+        column_name = data["column_name"]
+        
+        # Call generate_line_graph to get the line graph image and return the response directly
+        return generate_line_graph(column_name)
+        
         
 
 
