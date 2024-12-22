@@ -11,6 +11,7 @@ text_routes = Blueprint('text_routes', __name__)
 
 nlp = spacy.load("en_core_web_sm")
 
+
 @text_routes.route('/summarize', methods=['POST'])
 def summarize():
     data = request.json
