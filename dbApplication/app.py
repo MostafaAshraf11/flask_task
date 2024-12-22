@@ -5,6 +5,7 @@ from Routes.loan_routes import register_routes
 from Models.dbModel import db
 from Routes.image_routes import image_routes 
 from Routes.text_routes import text_routes
+from Routes.movies_routes import movies_bp
 
 
 def create_app():
@@ -17,6 +18,7 @@ def create_app():
     register_routes(app, db)
     app.register_blueprint(image_routes, url_prefix='/images')
     app.register_blueprint(text_routes, url_prefix='/text')
+    app.register_blueprint(movies_bp, url_prefix='/movies')
     
 
     migrate = Migrate(app, db)  # Initialize Flask-Migrate
