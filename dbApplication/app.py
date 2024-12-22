@@ -3,8 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from Routes.loan_routes import register_routes
 from Models.dbModel import db
-from Routes.image_routes import image_routes  # Import the blueprint
-import os
+from Routes.image_routes import image_routes 
+from Routes.text_routes import text_routes
 
 
 def create_app():
@@ -16,6 +16,8 @@ def create_app():
 
     register_routes(app, db)
     app.register_blueprint(image_routes, url_prefix='/images')
+    app.register_blueprint(text_routes, url_prefix='/text')
+    
 
     migrate = Migrate(app, db)  # Initialize Flask-Migrate
 
