@@ -1,10 +1,13 @@
+from spacy.language import Language
+from scipy import spatial
 from textblob import TextBlob
 import spacy
 from sklearn.manifold import TSNE
 from sklearn.feature_extraction.text import TfidfVectorizer
 import matplotlib.pyplot as plt
 import io
-from flask import jsonify
+from spacy.matcher import PhraseMatcher
+
 
 # Initialize the NLP model
 nlp = spacy.load("en_core_web_sm")
@@ -88,3 +91,62 @@ def generate_tsne_plot(texts):
         return buffer
     except Exception as e:
         raise Exception(f"Error generating t-SNE plot: {str(e)}")
+    
+
+@Language.component("set_custom_boundaries")  # Register the component
+def setCustomBoundaries(doc):
+    for token in doc[:-1]:
+        if token.text == ';':
+            doc[token.i + 1].is_sent_start = True
+        if token.text == ".":
+            doc[token.i + 1].is_sent_start = False
+    return doc
+
+# Function to create SpaCy document object from input text
+def getSpacyDocument(text):
+    return nlp(text)
+
+# Method to find cosine similarity between two vectors
+def cosineSimilarity(vect1, vect2):
+    return 1 - spatial.distance.cosine(vect1, vect2)
+
+# Function to create keyword vectors using SpaCy
+def createKeywordsVectors(keyword):
+    doc = nlp(keyword)
+    return doc.vector
+
+# Method to find similar words based on a keyword
+def getSimilarWords(keyword):
+    similarity_list = []
+
+    keyword_vector = createKeywordsVectors(keyword)
+
+    for tokens in nlp.vocab:
+        if tokens.has_vector:
+            if tokens.is_lower and tokens.is_alpha:
+                similarity_list.append((tokens, cosineSimilarity(keyword_vector, tokens.vector)))
+
+    similarity_list = sorted(similarity_list, key=lambda item: -item[1])[:30]
+    top_similar_words = [item[0].text for item in similarity_list]
+
+    top_similar_words.append(keyword)
+    for token in nlp(keyword):
+        top_similar_words.insert(0, token.lemma_)
+
+    top_similar_words = list(set(top_similar_words))
+    return ", ".join(top_similar_words)
+
+# Function to search for keyword in the document
+def search_for_keyword(keyword, doc_obj):
+    phrase_matcher = PhraseMatcher(nlp.vocab)
+    phrase_list = [nlp(keyword)]
+    phrase_matcher.add("Text Extractor", None, *phrase_list)
+
+    matched_items = phrase_matcher(doc_obj)
+
+    matched_text = []
+    for match_id, start, end in matched_items:
+        span = doc_obj[start:end]
+        matched_text.append(span.sent.text)
+
+    return matched_text

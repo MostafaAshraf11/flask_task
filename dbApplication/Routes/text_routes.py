@@ -1,5 +1,5 @@
 from flask import Blueprint, Response, request, jsonify
-from Controller.textController import (summarize_text, extract_keywords, analyze_sentiment, generate_tsne_plot)
+from Controller.textController import (getSimilarWords, getSpacyDocument, search_for_keyword, summarize_text, extract_keywords, analyze_sentiment, generate_tsne_plot)
 
 text_routes = Blueprint('text_routes', __name__)
 
@@ -64,3 +64,27 @@ def generate_tsne():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@text_routes.route('/search', methods=['POST'])
+def search():
+    data = request.get_json()
+    
+    if 'text' not in data or 'keyword' not in data:
+        return jsonify({'error': 'Please provide both "text" and "keyword".'}), 400
+
+    text = data['text']
+    keyword = data['keyword']
+
+    # Get the SpaCy document object from the text
+    doc_obj = getSpacyDocument(text)
+
+    # Find similar words
+    similar_words = getSimilarWords(keyword)
+
+    # Search for the keyword in the document
+    matched_sentences = search_for_keyword(keyword, doc_obj)
+
+    return jsonify({
+        'similar_words': similar_words,
+        'matched_sentences': matched_sentences
+    })
