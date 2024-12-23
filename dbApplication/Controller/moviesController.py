@@ -28,7 +28,7 @@ def upload_csv(file):
     try:
         data = pd.read_csv(filepath)
 
-        required_columns = ['id', 'title', 'director', 'release_year', 'runtime', 'genre', 'rating', 'gross']
+        required_columns = ['title', 'director', 'release_year', 'runtime', 'genre', 'rating', 'gross']
         for col in required_columns:
             if col not in data.columns:
                 return {'error': f'Missing required column: {col}'}, 400
@@ -37,8 +37,9 @@ def upload_csv(file):
         data.dropna(subset=required_columns, inplace=True)
 
         for _, row in data.iterrows():
+            # Generate a unique ID for the movie (e.g., using UUID)
             new_movie = Movies(
-                id=row['id'],
+                id=str(uuid.uuid4()),  # Generate a unique UUID for the movie
                 title=row['title'],
                 director=row['director'],
                 release_year=row['release_year'],
