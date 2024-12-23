@@ -1,0 +1,83 @@
+{
+	"info": {
+		"_postman_id": "1194050b-9fb2-47e8-8cc8-e3174751f7df",
+		"name": "text",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "24528147",
+		"_collection_link": "https://crimson-comet-179154.postman.co/workspace/Scalable~4e7f4c01-4e9f-41df-bb83-f8c740507d42/collection/24528147-1194050b-9fb2-47e8-8cc8-e3174751f7df?action=share&source=collection_link&creator=24528147"
+	},
+	"item": [
+		{
+			"name": "keyword extractions",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"text\":\"Artificial intelligence (AI) has rapidly evolved from a theoretical concept to a transformative force reshaping industries and societies worldwide.\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://127.0.0.1:5000/text/keywords"
+			},
+			"response": []
+		},
+		{
+			"name": "Summary",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"text\":\"Climate change refers to long-term shifts in temperatures and weather patterns, particularly changes that have been observed since the late 19th century. While natural processes can contribute to climate change, human activities such as burning fossil fuels, deforestation, and industrial practices are the primary drivers of the current global warming trends. The burning of fossil fuels releases greenhouse gases, such as carbon dioxide, into the atmosphere, which trap heat and raise the planet's average temperature. As a result, the Earth's climate is becoming warmer, leading to rising sea levels, more frequent extreme weather events, and disruptions to ecosystems. Addressing climate change requires global efforts, including reducing carbon emissions, transitioning to renewable energy sources, and promoting sustainable agricultural practices.\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://127.0.0.1:5000/text/summarize"
+			},
+			"response": []
+		},
+		{
+			"name": "generate_tsne",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"texts\": [\r\n    \"Plotly is a graphing library for making interactive plots.\",\r\n    \"T-SNE is a technique for dimensionality reduction.\",\r\n    \"Text processing involves tokenization and cleaning.\"\r\n  ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://127.0.0.1:5000/text/generate_tsne"
+			},
+			"response": []
+		},
+		{
+			"name": "basic sentiment analysis",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"text\": \"I love Flask. It's an amazing framework!\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://127.0.0.1:5000/text/sentiment"
+			},
+			"response": []
+		}
+	]
+}

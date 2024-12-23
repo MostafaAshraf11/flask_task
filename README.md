@@ -125,6 +125,7 @@ This structure ensures that the code is easier to maintain, test, and scale.
 9. **Postman**:
    - Purpose: Used for API testing and documentation due to its user-friendly interface and comprehensive features.
    - Advantages: Allowed efficient testing of API routes, ensuring backend functionality was robust.
+   - json collection are included in the project directory
 10. **Frontend Decision**:
     -Due to time constraints, development efforts were focused on the backend and testing processes.
     -This decision ensured the project met its deadlines without compromising core functionality

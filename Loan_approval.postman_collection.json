@@ -1,0 +1,229 @@
+{
+	"info": {
+		"_postman_id": "a5f52187-148c-4e7d-b2d0-3eb1b9b99746",
+		"name": "Loan_approval",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "24528147",
+		"_collection_link": "https://crimson-comet-179154.postman.co/workspace/Scalable~4e7f4c01-4e9f-41df-bb83-f8c740507d42/collection/34141484-a5f52187-148c-4e7d-b2d0-3eb1b9b99746?action=share&source=collection_link&creator=24528147"
+	},
+	"item": [
+		{
+			"name": "create loan",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"income\": 10000000000,\r\n    \"loan_amount\": 200000,\r\n    \"credit_score\": 750,\r\n    \"asset_value\": 100000,\r\n    \"loan_status\": \"Approved\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://127.0.0.1:5000/loan_approval"
+			},
+			"response": []
+		},
+		{
+			"name": "upload csv",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/C:/Users/mostafa/Downloads/loan_approval_dataset_modified_200.csv"
+						}
+					]
+				},
+				"url": "http://127.0.0.1:5000/upload_csv"
+			},
+			"response": []
+		},
+		{
+			"name": "Filter loans",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"filters\": [\r\n        {\"column\": \"loan_status\", \"value\": \"Approved\", \"operator\": \"equals\"},\r\n        {\"column\": \"income\", \"value\": 5000, \"operator\": \"greater_than\"}\r\n    ],\r\n    \"page\": 2\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://127.0.0.1:5000/loan_approval/filter"
+			},
+			"response": []
+		},
+		{
+			"name": "stats loans",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"column_name\": \"income\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://127.0.0.1:5000/loan_approval/stats"
+			},
+			"response": []
+		},
+		{
+			"name": "charts",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"column_name\": \"income\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://127.0.0.1:5000/loan_approval/chart"
+			},
+			"response": []
+		},
+		{
+			"name": "line graph",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"column_name\": \"income\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://127.0.0.1:5000/loan_approval/graph"
+			},
+			"response": []
+		},
+		{
+			"name": "Get ALL loans",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"John Doe\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/loan_approval?page=1",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"loan_approval"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get loan by id",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "201",
+						"value": "",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://127.0.0.1:5000/loan_approval/202"
+			},
+			"response": []
+		},
+		{
+			"name": "update loan",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "",
+						"value": "",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"loan_status\": \"Rejected\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://127.0.0.1:5000/loan_approval/201"
+			},
+			"response": []
+		},
+		{
+			"name": "Delete loan",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://127.0.0.1:5000/loan_approval/202"
+			},
+			"response": []
+		}
+	]
+}

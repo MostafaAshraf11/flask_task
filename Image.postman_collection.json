@@ -1,0 +1,268 @@
+{
+	"info": {
+		"_postman_id": "59dc644c-dc3d-41cd-9c64-ed6635a5c19c",
+		"name": "Image",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "24528147",
+		"_collection_link": "https://crimson-comet-179154.postman.co/workspace/Scalable~4e7f4c01-4e9f-41df-bb83-f8c740507d42/collection/34141484-59dc644c-dc3d-41cd-9c64-ed6635a5c19c?action=share&source=collection_link&creator=24528147"
+	},
+	"item": [
+		{
+			"name": "upload images",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": {
+						"password": "Mos2001$$",
+						"username": "DBADMIN"
+					}
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "images",
+							"type": "file",
+							"src": [
+								"/C:/Users/mostafa/Pictures/Screenshots/Screenshot 2024-08-03 224809.png",
+								"/C:/Users/mostafa/Pictures/Screenshots/Screenshot 2024-04-08 013944.png",
+								"/C:/Users/mostafa/Pictures/Screenshots/Screenshot 2024-04-08 014725.png",
+								"/C:/Users/mostafa/Pictures/Screenshots/Screenshot 2024-04-08 014830.png"
+							]
+						}
+					]
+				},
+				"url": "http://127.0.0.1:5000/images/upload_images"
+			},
+			"response": []
+		},
+		{
+			"name": "generate histogram",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": {
+						"password": "Mos2001$$",
+						"username": "DBADMIN"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"url": "http://127.0.0.1:5000/images/generate_histogram/1"
+			},
+			"response": []
+		},
+		{
+			"name": "get all images",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": {
+						"password": "Mos2001$$",
+						"username": "DBADMIN"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "images",
+							"type": "file",
+							"src": [
+								"/C:/Users/mostafa/Pictures/Screenshots/Screenshot 2024-08-03 224809.png",
+								"/C:/Users/mostafa/Pictures/Screenshots/Screenshot 2024-04-08 013944.png",
+								"/C:/Users/mostafa/Pictures/Screenshots/Screenshot 2024-04-08 014725.png",
+								"/C:/Users/mostafa/Pictures/Screenshots/Screenshot 2024-04-08 014830.png"
+							]
+						}
+					]
+				},
+				"url": "http://127.0.0.1:5000/images/fetch_images"
+			},
+			"response": []
+		},
+		{
+			"name": "get image",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": {
+						"password": "Mos2001$$",
+						"username": "DBADMIN"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "images",
+							"type": "file",
+							"src": [
+								"/C:/Users/mostafa/Pictures/Screenshots/Screenshot 2024-08-03 224809.png",
+								"/C:/Users/mostafa/Pictures/Screenshots/Screenshot 2024-04-08 013944.png",
+								"/C:/Users/mostafa/Pictures/Screenshots/Screenshot 2024-04-08 014725.png",
+								"/C:/Users/mostafa/Pictures/Screenshots/Screenshot 2024-04-08 014830.png"
+							]
+						}
+					]
+				},
+				"url": "http://127.0.0.1:5000/images/fetch_image/7"
+			},
+			"response": []
+		},
+		{
+			"name": "upload image",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": {
+						"password": "Mos2001$$",
+						"username": "DBADMIN"
+					}
+				},
+				"method": "POST",
+				"header": [],
+				"url": "http://127.0.0.1:5000/images/upload_image"
+			},
+			"response": []
+		},
+		{
+			"name": "segmentation mask",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": {
+						"password": "Mos2001$$",
+						"username": "DBADMIN"
+					}
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"lower_bound\": [100, 100, 100],  // Lower HSV threshold\r\n  \"upper_bound\": [255, 255, 255] // Upper HSV threshold\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://127.0.0.1:5000/images/generate_segmentation/5"
+			},
+			"response": []
+		},
+		{
+			"name": "resize_image",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": {
+						"password": "Mos2001$$",
+						"username": "DBADMIN"
+					}
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"width\": 200,\r\n  \"height\": 200,\r\n  \"format_type\": \"JPG\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/images/resize_image/7",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"images",
+						"resize_image",
+						"7"
+					],
+					"query": [
+						{
+							"key": "type",
+							"value": null,
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Crop image",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": {
+						"password": "Mos2001$$",
+						"username": "DBADMIN"
+					}
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"width\": 200,\r\n  \"height\": 200,\r\n  \"format_type\": \"JPG\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/images/crop_image/3",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"images",
+						"crop_image",
+						"3"
+					],
+					"query": [
+						{
+							"key": "type",
+							"value": null,
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
