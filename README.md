@@ -15,6 +15,7 @@ This project was developed over three days, starting Friday at 5 PM and concludi
   - Developed and tested the CRUD API for the loan approval model.  
   - Successfully completed the first day with the initial CRUD functionality in place.  
 
+
 ---
 
 ### **Day 2: Saturday**  
@@ -48,17 +49,15 @@ The third day ended with a fully functional NLP service integrated into the appl
   - Repurposed functionality from the `loan_approval` module for tasks like filtering and categorization.  
   - The familiarity with the CRUD patterns from previous days expedited the process.  
 
+- **Dockerization and Kubernetes Configuration**: 4-5 hours  
+  - Dockerized the Flask application and uploaded the image to [Docker Hub](https://hub.docker.com/r/mostafaaboelenien/flask-app).  
+  - Configured Kubernetes for deployment, including creating manifests for pods, services, and deployments.  
+  - Encountered challenges in managing configurations but successfully set up the environment for container orchestration.  
+
+- **Overall Effort**:  
+  Approximately 60% of my time was spent on research and testing APIs to ensure the functionality and reliability of the application.  
+
 ---
-
-**Total Time Spent**: ~31-32 hours  
-
-### **Time Division Summary**
-- **Research and Setup**: ~6 hours  
-- **Development**: ~18 hours (CRUD, APIs, cloud integration, NLP, and movies table)  
-- **Testing and Debugging**: ~4 hours  
-- **Deployment and Finalization**: ~3 hours  
-
-
 ## Application Functionality
 
 This Flask application provides several functionalities, organized into various modules:
@@ -190,7 +189,7 @@ This structure ensures that the code is easier to maintain, test, and scale.
    ```
 
 ### Option 2: Using Docker
-1. Create a `Dockerfile` in the project directory with the following content:
+1. use the `Dockerfile` in the project directory with the following content:
    ```dockerfile
    FROM python:3.9-slim
 
@@ -210,6 +209,50 @@ This structure ensures that the code is easier to maintain, test, and scale.
    ```bash
    docker run -p 5000:5000 flask-app
    ```
+### Using Kubernetes  
+1. **Publish Docker Image to Docker Hub**  
+   - Push the Docker image created earlier to Docker Hub:  
+     ```bash
+     docker tag flask-app your-dockerhub-username/flask-app  
+     docker push your-dockerhub-username/flask-app  
+     ```  
+
+2. **Install and Configure Kubernetes Tools**  
+   - Download and install `kubectl` and `kompose`.  
+   - Add them to your system's environment path to use them globally.  
+
+3. **Set Up Kubernetes Resources**  
+   - Use the following YAML files to define your application:  
+     - `application.yaml` for the deployment configuration.  
+     - `ingress.yaml` for ingress setup.  
+     - `service.yaml` for service configuration.  
+   - Apply the configurations:  
+     ```bash
+     kubectl apply -f service.yaml  
+     kubectl apply -f application.yaml  
+     kubectl apply -f ingress.yaml  
+     ```  
+
+4. **Set Up Port Forwarding**  
+   - Forward a port to access your service locally:  
+     ```bash
+     kubectl port-forward service/flask-app 5000:5000  
+     ```  
+
+5. **Set Up Ingress Controller**  
+   - Create a namespace for the ingress controller:  
+     ```bash
+     kubectl create namespace ingress-nginx  
+     ```  
+   - Deploy the ingress controller:  
+     ```bash
+     kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml  
+     ```  
+   - Verify the ingress pods:  
+     ```bash
+     kubectl get pods -n ingress-nginx  
+     ```  
+
 
 ---
 

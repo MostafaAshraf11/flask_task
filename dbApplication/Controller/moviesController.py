@@ -1,4 +1,5 @@
 import os
+import uuid
 import pandas as pd
 from flask import current_app as app
 from sqlalchemy import or_
@@ -37,9 +38,8 @@ def upload_csv(file):
         data.dropna(subset=required_columns, inplace=True)
 
         for _, row in data.iterrows():
-            # Generate a unique ID for the movie (e.g., using UUID)
+            # Assuming 'movies_id' is a field in the database and auto-incremented, you don't need to set it manually
             new_movie = Movies(
-                id=str(uuid.uuid4()),  # Generate a unique UUID for the movie
                 title=row['title'],
                 director=row['director'],
                 release_year=row['release_year'],
@@ -55,6 +55,7 @@ def upload_csv(file):
 
     except Exception as e:
         return {'error': str(e)}, 500
+
 
 def create_movie(data):
     """
