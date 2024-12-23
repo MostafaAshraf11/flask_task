@@ -35,19 +35,47 @@ def delete_movie_route(movie_id):
 
 @movies_bp.route('/search', methods=['GET'])
 def search_moviesroute():
-    # Get search query from the URL parameter
+    """
+    Search for movies by title or director. Partial matches are allowed.
+
+    Input:
+        Query Parameters:
+        - "query" (str): The search term to look for in movie titles or director names.
+
+    Output:
+        JSON response with:
+        - List of movies matching the search criteria (partial matches).
+        - HTTP status code.
+    """
     search_query = request.args.get('query', default=None, type=str)
 
+    if not search_query:
+        return jsonify({'error': 'Search query is required'}), 400
 
-    # Call the MovieController to perform the search
+    # Search movies by title or director (partial match)
     movie_list = search_movies(search_query)
+    return jsonify(movie_list), 200
 
-    # Return the results as JSON
-    return jsonify(movie_list)
 
 @movies_bp.route('/filter', methods=['GET'])
 def filter_moviesroute():
-    # Get filter parameters from the URL query string
+    """
+    Filter movies by genre, release year, gross income, and rating with pagination support.
+
+    Input:
+        Query Parameters:
+        - "genre" (str, optional): The genre to filter by.
+        - "release_year" (int, optional): The release year to filter by.
+        - "min_gross" (float, optional): Minimum gross income to filter by.
+        - "min_rating" (float, optional): Minimum rating to filter by.
+        - "page" (int, optional): Page number for pagination (default: 1).
+        - "per_page" (int, optional): Number of items per page (default: 20).
+
+    Output:
+        JSON response with:
+        - List of filtered movies matching the criteria.
+        - HTTP status code.
+    """
     genre = request.args.get('genre', default=None, type=str)
     release_year = request.args.get('release_year', default=None, type=int)
     min_gross = request.args.get('min_gross', default=None, type=float)
@@ -55,8 +83,5 @@ def filter_moviesroute():
     page = request.args.get('page', default=1, type=int)
     per_page = request.args.get('per_page', default=20, type=int)
 
-    # Call the controller function to perform the filtering
     filtered_movies = filter_movies(genre, release_year, min_gross, min_rating, page, per_page)
-
-    # Return the results as JSON
-    return jsonify(filtered_movies)
+    return jsonify(filtered_movies), 200

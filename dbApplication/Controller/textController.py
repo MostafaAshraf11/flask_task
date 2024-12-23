@@ -6,14 +6,28 @@ from sklearn.manifold import TSNE
 from sklearn.feature_extraction.text import TfidfVectorizer
 import matplotlib.pyplot as plt
 import io
-from spacy.matcher import PhraseMatcher
 
 
 # Initialize the NLP model
 nlp = spacy.load("en_core_web_sm")
 
 def summarize_text(text):
-    # Process the text with spaCy
+    """
+    Summarize the input text by extracting sentences with named entities.
+
+    This method performs basic extractive summarization by processing the input text using spaCy
+    and extracting sentences that contain named entities. The top 3 sentences with named entities
+    are returned as the summary.
+
+    Technologies used:
+        - spaCy (for NLP processing)
+
+    Input:
+        text (str): Input text to summarize.
+
+    Output:
+        str: Summary consisting of the top 3 sentences containing named entities.
+    """
     doc = nlp(text)
 
     # Extract sentences with named entities or keywords (basic extractive summarization)
@@ -23,6 +37,21 @@ def summarize_text(text):
     return summary_text
 
 def extract_keywords(text):
+    """
+    Extract keywords (nouns and proper nouns) from the input text.
+
+    This method processes the input text using spaCy and extracts keywords, which are defined as
+    nouns and proper nouns. The result is a list of unique keywords.
+
+    Technologies used:
+        - spaCy (for NLP processing)
+
+    Input:
+        text (str): Input text to extract keywords from.
+
+    Output:
+        list: A list of unique keywords (nouns and proper nouns) extracted from the text.
+    """
     try:
         # Process the text using spaCy
         doc = nlp(text)
@@ -37,6 +66,23 @@ def extract_keywords(text):
         raise Exception(f"Error extracting keywords: {str(e)}")
 
 def analyze_sentiment(text):
+    """
+    Analyze the sentiment of the input text.
+
+    This method uses TextBlob to perform sentiment analysis on the input text. It returns
+    a dictionary containing two values: polarity (sentiment score) and subjectivity (subjective
+    nature of the text).
+
+    Technologies used:
+        - TextBlob (for sentiment analysis)
+
+    Input:
+        text (str): Input text to analyze sentiment.
+
+    Output:
+        dict: A dictionary with two keys: 'polarity' and 'subjectivity', representing
+              the sentiment polarity and subjectivity score of the text.
+    """
     try:
         # Perform sentiment analysis using TextBlob
         blob = TextBlob(text)
@@ -50,49 +96,77 @@ def analyze_sentiment(text):
         raise Exception(f"Error analyzing sentiment: {str(e)}")
 
 def preprocess_text(text):
-    # Process the text using spaCy
+    """
+    Preprocess the input text by lowering case, removing stopwords, non-alphabetic tokens, and lemmatizing.
+
+    This method processes the input text using spaCy by converting it to lowercase, removing stopwords,
+    removing non-alphabetic tokens, and lemmatizing the remaining words. The processed text is returned as a string.
+
+    Technologies used:
+        - spaCy (for text processing and lemmatization)
+
+    Input:
+        text (str): The text to preprocess.
+
+    Output:
+        str: The preprocessed text with stopwords removed, non-alphabetic tokens filtered, and lemmatized.
+    """
     doc = nlp(text.lower())
-    
-    # Filter out stopwords and non-alphabetic tokens, then lemmatize
+
     filtered_words = [token.lemma_ for token in doc if not token.is_stop and token.is_alpha]
-    
-    # Join the processed tokens back into a string
+
     return " ".join(filtered_words)
 
 def generate_tsne_plot(texts):
+    """
+    Generate a t-SNE plot for visualizing high-dimensional text data.
+
+    This method converts a list of texts into TF-IDF features, applies t-SNE for dimensionality reduction to 2D,
+    and then generates a scatter plot of the result. The plot is saved as a PNG image in a bytes buffer, which is returned.
+
+    Technologies used:
+        - scikit-learn (for TF-IDF and t-SNE)
+        - matplotlib (for plotting)
+
+    Input:
+        texts (list[str]): A list of text documents to analyze.
+
+    Output:
+        io.BytesIO: A bytes buffer containing the generated t-SNE plot as a PNG image.
+    """
     try:
         # Convert texts to TF-IDF features
         vectorizer = TfidfVectorizer()
         tfidf_matrix = vectorizer.fit_transform(texts)
 
-        # Get number of samples
+
         n_samples = tfidf_matrix.shape[0]
 
-        # Set perplexity to a value less than the number of samples
-        perplexity = min(n_samples - 1, 30)  # Set perplexity to 30 or less than n_samples
+        # Set perplexity to 30 or less than n_samples
+        perplexity = min(n_samples - 1, 30)  
 
         # Apply t-SNE for dimensionality reduction
         tsne = TSNE(n_components=2, random_state=42, perplexity=perplexity)
         X_tsne = tsne.fit_transform(tfidf_matrix.toarray())
 
-        # Plotting the t-SNE result
+ 
         plt.figure(figsize=(8, 6))
-        plt.scatter(X_tsne[:, 0], X_tsne[:, 1], marker='o', c='blue')  # Optionally, you can color by clusters if needed
+        plt.scatter(X_tsne[:, 0], X_tsne[:, 1], marker='o', c='blue') 
         plt.title('t-SNE Visualization of Texts')
         plt.xlabel('Component 1')
         plt.ylabel('Component 2')
 
-        # Save the plot to a bytes buffer
         buffer = io.BytesIO()
-        plt.savefig(buffer, format='png')  # Save the figure as a PNG image
-        buffer.seek(0)  # Rewind the buffer to the beginning
-        plt.close()  # Close the plot to free resources
+        plt.savefig(buffer, format='png')  
+        buffer.seek(0) 
+        plt.close()
 
         return buffer
     except Exception as e:
         raise Exception(f"Error generating t-SNE plot: {str(e)}")
-    
 
+    
+"""""
 @Language.component("set_custom_boundaries")  # Register the component
 def setCustomBoundaries(doc):
     for token in doc[:-1]:
@@ -150,3 +224,4 @@ def search_for_keyword(keyword, doc_obj):
         matched_text.append(span.sent.text)
 
     return matched_text
+"""

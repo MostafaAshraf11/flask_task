@@ -1,5 +1,5 @@
 from flask import Blueprint, Response, request, jsonify
-from Controller.textController import (getSimilarWords, getSpacyDocument, search_for_keyword, summarize_text, extract_keywords, analyze_sentiment, generate_tsne_plot)
+from Controller.textController import ( summarize_text, extract_keywords, analyze_sentiment, generate_tsne_plot)
 
 text_routes = Blueprint('text_routes', __name__)
 
@@ -64,6 +64,9 @@ def generate_tsne():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+
+"""
 
 @text_routes.route('/search', methods=['POST'])
 def search():
@@ -88,3 +91,5 @@ def search():
         'similar_words': similar_words,
         'matched_sentences': matched_sentences
     })
+
+"""

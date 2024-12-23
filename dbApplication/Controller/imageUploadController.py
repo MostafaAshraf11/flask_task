@@ -1,11 +1,10 @@
 import io
-import os
 import cloudinary
 import cloudinary.api
 from cloudinary.uploader import upload, destroy
 from werkzeug.utils import secure_filename
 from Models.image_model import Image
-from Models.dbModel import db  # Import the database instance and Image model
+from Models.dbModel import db 
 import requests
 import cv2
 import numpy as np
@@ -23,31 +22,41 @@ cloudinary.config(
     secure=True
 )
 
-# Method for uploading a single image to Cloudinary and saving it to the database
 def upload_image_to_cloudinary(file):
+    """
+    Upload a single image to Cloudinary and save its details to the database.
+
+    Input: 
+        file (FileStorage): The image file to upload.
+    Output: 
+        dict: Success message with image URL, or an error message.
+        int: HTTP status code.
+    """
     try:
-        # Secure the filename
         filename = secure_filename(file.filename)
-
-        # Upload image to Cloudinary
         upload_result = cloudinary.uploader.upload(file)
-
-        # Get the secure URL and public_id for the uploaded image
         image_url = upload_result['secure_url']
         public_id = upload_result['public_id']
 
-        # Save the image record in the database (including public_id)
         image = Image(filename=filename, url=image_url, public_id=public_id)
         db.session.add(image)
         db.session.commit()
 
         return {'message': 'Image uploaded successfully', 'image_url': image_url}, 200
     except Exception as e:
-        db.session.rollback()  # Rollback in case of error
+        db.session.rollback()
         return {'error': str(e)}, 500
 
-# Method for batch uploading images to Cloudinary and saving them to the database
 def upload_images_to_cloudinary(files):
+    """
+    Upload multiple images to Cloudinary and save their details to the database.
+
+    Input:
+        files (list): List of FileStorage objects representing the images.
+    Output:
+        dict: Success message with details of uploaded images, or an error message.
+        int: HTTP status code.
+    """
     uploaded_images = []
     try:
         for file in files:
@@ -56,32 +65,45 @@ def upload_images_to_cloudinary(files):
             image_url = upload_result['secure_url']
             public_id = upload_result['public_id']
 
-            # Save image details in the database (including public_id)
             image = Image(filename=filename, url=image_url, public_id=public_id)
             db.session.add(image)
             uploaded_images.append({'filename': filename, 'image_url': image_url, 'public_id': public_id})
 
         db.session.commit()
-
         return {'message': 'Images uploaded successfully', 'uploaded_images': uploaded_images}, 200
     except Exception as e:
-        db.session.rollback()  # Rollback in case of error
+        db.session.rollback()
         return {'error': str(e)}, 500
 
 def fetch_image_from_db(db_id):
+    """
+    Fetch image details from the database by ID.
+
+    Input: 
+        db_id (int): The ID of the image record.
+    Output: 
+        dict: Image details or an error message.
+        int: HTTP status code.
+    """
     try:
-        # Fetch the image record from the database using the provided ID
         image = Image.query.get(db_id)
         if image:
-            # Return the image data (URL and other relevant info)
             return {'filename': image.filename, 'url': image.url}, 200
         else:
             return {'error': 'Image not found in database'}, 404
     except Exception as e:
-        # Handle any errors that occur during the process
         return {'error': str(e)}, 500
 
 def fetch_images_with_pagination(page, per_page):
+    """
+    Fetch paginated images from the database.
+
+    Input:
+        page (int): Current page number.
+        per_page (int): Number of images per page.
+    Output:
+        dict: Paginated image details or an error message.
+    """
     try:
         images = Image.query.paginate(page=page, per_page=per_page, error_out=False)
         return {
@@ -95,42 +117,43 @@ def fetch_images_with_pagination(page, per_page):
 
 def fetch_image_from_url(image_url):
     """
-    Fetch the image from the URL and return it as a NumPy array.
+    Fetch an image from a given URL and return it as a NumPy array.
+
+    Input:
+        image_url (str): URL of the image to fetch.
+    Output:
+        numpy.ndarray: Image as an array or None on failure.
     """
     try:
         response = requests.get(image_url)
         img = PILImage.open(BytesIO(response.content))
         img = np.array(img)
-        # Convert RGB to BGR (OpenCV uses BGR by default)
-        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-        return img
-    except Exception as e:
-        return None   
+        return cv2.cvtColor(img, cv2.COLOR_RGB2BGR)  # Convert RGB to BGR for OpenCV
+    except Exception:
+        return None
 
 def generate_color_histogram(db_id):
     """
-    Generate a color histogram for the image located at the given database ID and return it as a graph.
+    Generate a color histogram for an image in the database.
+
+    Input:
+        db_id (int): The ID of the image in the database.
+    Output:
+        Response: Graph image as a PNG response or an error message.
     """
     try:
-        # Fetch the image data (URL and filename) from the database using db_id
         image_data, status_code = fetch_image_from_db(db_id)
         if status_code != 200:
             return {'error': 'Image not found'}, 404
 
-        image_url = image_data['url']  # Get the URL from the database record
-
-        # Fetch the image from the URL
+        image_url = image_data['url']
         image = fetch_image_from_url(image_url)
         if image is None:
             return {'error': 'Image could not be retrieved from the URL'}, 404
 
-        # Convert the image from BGR to RGB (for visualization consistency)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        
-        # Calculate histogram for each color channel (R, G, B)
         color_channels = ('r', 'g', 'b')
 
-        # Plot the histograms
         plt.figure(figsize=(10, 6))
         for i, col in enumerate(color_channels):
             hist = cv2.calcHist([image], [i], None, [256], [0, 256])
@@ -140,92 +163,89 @@ def generate_color_histogram(db_id):
         plt.xlabel('Pixel Intensity')
         plt.ylabel('Frequency')
         plt.legend()
-        
-        # Save the plot to a bytes buffer
+
         buffer = io.BytesIO()
         plt.savefig(buffer, format='png')
         buffer.seek(0)
-        plt.close()  # Close the plot to free resources
-        
-        # Return the graph as a response
-        return Response(buffer, mimetype='image/png')
+        plt.close()
 
+        return Response(buffer, mimetype='image/png')
     except Exception as e:
-        # Handle unexpected errors
         return {'error': str(e)}, 500
 
 def generate_segmentation_mask(db_id, lower_bound, upper_bound):
     """
-    Generate a segmentation mask and save the results as images.
+    Generate a segmentation mask for an image based on HSV thresholds and return the result.
+
+    In this method, we apply an HSV-based mask to isolate specific regions in an image
+    using the given lower and upper HSV thresholds. The result is returned as a PNG image
+    in a byte stream.
+
+    Input:
+        db_id (int): ID of the image record in the database.
+        lower_bound (list[int]): Lower HSV threshold as a list of integers [H, S, V].
+        upper_bound (list[int]): Upper HSV threshold as a list of integers [H, S, V].
+
+    Output:
+        BytesIO: Segmented image in PNG format as a byte stream, or an error message with a status code.
     """
-    # Fetch the image data (URL and filename) from the database using db_id
     image_data, status_code = fetch_image_from_db(db_id)
     if status_code != 200:
-        return image_data  # Return error message if the image is not found
-    
-    image_url = image_data['url']  # Get the URL from the database record
+        return image_data  
 
-    # Fetch the image from the URL
+    image_url = image_data['url']  
     image = fetch_image_from_url(image_url)
     if image is None:
         return {'error': 'Image could not be retrieved from the URL'}, 404
-    
-    # Convert to HSV (Hue, Saturation, Value) color space for easier thresholding
+
     hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-    
-    # Apply the mask to the image
     mask = cv2.inRange(hsv_image, np.array(lower_bound), np.array(upper_bound))
-    
-    # Apply the mask to get the segmented regions
     segmented_image = cv2.bitwise_and(image, image, mask=mask)
 
-    # Encode the segmented image to PNG format and save to a buffer
     _, segmented_image_buffer = cv2.imencode('.png', segmented_image)
-    
-    # Create a byte buffer for the segmented image
     segmented_image_bytes = io.BytesIO(segmented_image_buffer.tobytes())
-    
+
     return segmented_image_bytes
 
-
 def transform_image(image_id, width, height, format_type=None):
+    """
+    Transform an image by resizing it to the specified dimensions and optionally converting its format.
+    The transformed image is uploaded back to Cloudinary, and its URL is updated in the database.
+
+    Input:
+        image_id (int): ID of the image record in the database.
+        width (int): New width for the image.
+        height (int): New height for the image.
+        format_type (str, optional): Target image format (e.g., 'JPEG', 'PNG'). Defaults to None.
+
+    Output:
+        dict: Success message with the new image URL, or an error message with a status code.
+    """
     try:
-        # Get the image record from the database
         image = Image.query.get(image_id)
         if not image:
             return {'error': 'Image not found'}, 404
 
-        # Download the image using the stored URL
-        image_url = image.url  # Use the URL from the database directly
+        image_url = image.url
         image_file = BytesIO(requests.get(image_url).content)
-        
-        # Open the image using Pillow
         img = PILImage.open(image_file)
+        img = img.resize((width, height))
 
-        # Resize the image
-        img = img.resize((width, height))  # Resize the image
-
-        # Convert the format if a format type is provided (e.g., to JPEG or PNG)
         if format_type:
-            format_type = format_type.upper()  # Ensure it's in uppercase
+            format_type = format_type.upper()
             if format_type == 'JPG':
-                format_type = 'JPEG'  # PIL uses 'JPEG' for jpg
+                format_type = 'JPEG'
             img_format = format_type
         else:
-            img_format = img.format if img.format else 'PNG'  # Default to PNG if no format is provided
+            img_format = img.format if img.format else 'PNG'
 
-        # Save the image to a BytesIO object to upload back to Cloudinary
         new_image_stream = BytesIO()
         img.save(new_image_stream, format=img_format)
         new_image_stream.seek(0)
 
-        # Upload the transformed image back to Cloudinary, overwriting the original image
         upload_result = upload(new_image_stream, public_id=image.public_id, overwrite=True)
-
-        # Get the new URL
         new_url = upload_result['secure_url']
 
-        # Update the image record in the database with the new URL
         image.url = new_url
         db.session.commit()
 
@@ -233,41 +253,46 @@ def transform_image(image_id, width, height, format_type=None):
     except Exception as e:
         return {'error': str(e)}, 500
 
+
 def crop_image(image_id, x, y, width, height):
+    """
+    Crop an image to the specified dimensions and upload the cropped result to Cloudinary.
+    The image URL in the database is updated after the crop.
+
+    Input:
+        image_id (int): ID of the image record in the database.
+        x (int): X-coordinate of the top-left corner of the crop box.
+        y (int): Y-coordinate of the top-left corner of the crop box.
+        width (int): Width of the crop box.
+        height (int): Height of the crop box.
+
+    Output:
+        dict: Success message with the new image URL, or an error message with a status code.
+    """
     try:
-        # Get the image record from the database
         image = Image.query.get(image_id)
         if not image:
             return {'error': 'Image not found'}, 404
 
-        # Download the image from Cloudinary using the public_id
         image_data = cloudinary.api.resource(image.public_id)
         image_url = image_data['secure_url']
 
-        # Open the image using Pillow
         image_file = BytesIO(requests.get(image_url).content)
         img = PILImage.open(image_file)
 
-        # Ensure the crop area is within the image bounds
         image_width, image_height = img.size
         if x + width > image_width or y + height > image_height:
             return {'error': "Crop area exceeds image bounds"}, 400
 
-        # Crop the image
         cropped_image = img.crop((x, y, x + width, y + height))
 
-        # Save the cropped image to a BytesIO object
         new_image_stream = BytesIO()
         cropped_image.save(new_image_stream, format=img.format)
         new_image_stream.seek(0)
 
-        # Upload the cropped image to Cloudinary
         upload_result = upload(new_image_stream, public_id=image.public_id, overwrite=True)
-
-        # Get the new URL for the cropped image
         new_url = upload_result['secure_url']
 
-        # Update the image record in the database with the new URL
         image.url = new_url
         db.session.commit()
 

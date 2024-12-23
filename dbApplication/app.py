@@ -11,8 +11,7 @@ from Routes.movies_routes import movies_bp
 def create_app():
     app = Flask(__name__)
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///./testdb.db'
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # Optional, suppresses warnings
-
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False 
     db.init_app(app)  # Bind SQLAlchemy to the app
 
     register_routes(app, db)
@@ -21,6 +20,6 @@ def create_app():
     app.register_blueprint(movies_bp, url_prefix='/movies')
     
 
-    migrate = Migrate(app, db)  # Initialize Flask-Migrate
+    migrate = Migrate(app, db)
 
     return app
