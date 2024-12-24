@@ -1,7 +1,9 @@
 import io
+import os
 import cloudinary
 import cloudinary.api
 from cloudinary.uploader import upload, destroy
+from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
 from Models.image_model import Image
 from Models.dbModel import db 
@@ -14,13 +16,16 @@ import matplotlib.pyplot as plt
 from flask import Response
 
 
+load_dotenv()
+
 # Cloudinary Configuration
-cloudinary.config( 
-    cloud_name="dgfukkkda", 
-    api_key="555114447294219", 
-    api_secret="JqV25j1fKLKRXGn2-PX55YoCYX4",  # Your API Secret
+cloudinary.config(
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"), 
+    api_key=os.getenv("CLOUDINARY_API_KEY"), 
+    api_secret=os.getenv("CLOUDINARY_API_SECRET"), 
     secure=True
 )
+
 
 def upload_image_to_cloudinary(file):
     """
